@@ -1,0 +1,716 @@
+body {
+  background-color: cornsilk;
+  margin: 0px;
+  overflow: hidden;
+  
+  width: 100vw;
+  height: 100vh;
+}
+
+#title {
+  text-align: center;
+  position: relative;
+  left: 25vw;
+  width: 50vw;
+  background-image: linear-gradient(90deg, transparent, grey, transparent);
+  margin: 0px;
+  padding: 5px 0px 5px 0px;
+  z-index: 100;
+  user-select: none;
+  pointer-events: none;
+}
+
+#sandbox {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  height: 100vh;
+  width: 100vw;
+}
+
+#sandbox:hover {
+  cursor: grab;
+}
+
+#toolbox, #extensionBox {
+  position: absolute;
+  top: 0px;
+  width: 25vw;
+  height: 30px;
+  background-color: lightgreen;
+  z-index: 10;
+  
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: space-evenly;
+
+  transition-property: height, opacity;
+  transition-duration: 250ms, 100ms;
+}
+
+#title, #simControls {
+  opacity: 1;
+  transition-property: opacity;
+  transition-duration: 100ms;
+}
+
+#toolbox[data-hidden="0"], #extensionBox[data-hidden="0"], #title[data-hidden="0"], #simControls[data-hidden="0"] {
+  opacity: 1;
+}
+
+#toolbox[data-hidden="1"], #extensionBox[data-hidden="1"], #title[data-hidden="1"], #simControls[data-hidden="1"] {
+  opacity: 0;
+  user-select: none;
+}
+
+#keysHolder[data-hidden="1"]:hover {
+  opacity: 1;
+}
+
+#keysHolder[data-hidden="1"] {
+  opacity: 0;
+}
+
+#toolbox {
+  left: 0px;
+}
+
+#extensionBox {
+  right: 0px;
+}
+
+#toolbox[data-active="0"] {
+  pointer-events: none;
+}
+
+#toolbox:hover {
+  height: 80px;
+}
+
+#extensionBox:hover {
+  height: 120px;
+}
+  
+.sections {
+  flex: 1 0 0;
+  /* height: 80px; */
+  background-color: #9aa0e4;
+  display: inline-block;
+  border-right: solid black 2px;
+  position: relative;
+  overflow: hidden;
+
+  transition-property: flex;
+  transition-duration: 250ms;
+  /* transition-timing-function: linear; */
+}
+
+#toolbox > .sections:hover {
+  flex: 0 0 80px;
+}
+
+#extensionBox > .sections:hover {
+  flex: 0 0 120px;
+}
+
+.sections:last-child {
+  border-right: none;
+}
+
+.sectionTitles {
+  position: absolute;
+  bottom: 5px;
+  width: 100%;
+  text-align: center;
+  margin: 0px;
+  background-image: linear-gradient(to top, #9aa0e4aa 30%, #9aa0e4aa, transparent);
+  pointer-events: none;
+  user-select: none;
+  z-index: 100;
+}
+
+.sections > .components {
+  z-index: 0;
+}
+
+#deletionOverlay {
+  width: 100vw;
+  height: 50px;
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  background-image: linear-gradient(red, transparent);
+  z-index: 1000;
+  pointer-events: none;
+  
+  opacity: 0;
+  transition-property: opacity;
+  transition-duration: 200ms;
+}
+
+#simControls {
+  position: absolute;
+  right: 0px;
+  bottom: 0px;
+  width: 100px;
+  height: 200px;
+
+  padding: 0px 20px 20px 10px;
+  background-color: rgb(160, 160, 160);
+  z-index: 100;
+
+  transition-property: opacity;
+  transition-duration: 100ms;
+}
+
+#simSpeed {
+  position: absolute;
+  top: 190px;
+  left: 10px;
+  transform: rotate(-90deg);
+  transform-origin: 0% 0%;
+  width: 180px;
+  height: 30px;
+  margin: 0px;
+}
+
+#simSpeedLabel {
+  position: absolute;
+  top: 192px;
+  left: 10px;
+  width: 30px;
+  display: inline-block;
+  text-align: center;
+}
+
+#saveButton, #loadButton, #clearButton {
+  position: absolute;
+  right: 10px;
+  padding: 5px 20px 5px 20px;
+}
+
+#saveButton {
+  bottom: 10px;
+}
+
+#loadButton {
+  bottom: 45px;
+}
+
+#clearButton {
+  bottom: 80px;
+}
+
+.components {
+  position: absolute;
+  user-select: none;
+  z-index: 2;
+
+  transition-property: transform;
+  transition-duration: 100ms;
+}
+
+.components:hover {
+  cursor: move;
+}
+
+.components[data-focus] {
+  outline: #0ea94f 4px solid;
+}
+
+.basics {
+  height: 20px;
+  width: 20px;
+  background-color: rgb(255, 31, 255);
+}
+
+.wires {
+  transform-origin: 0% 50%;
+  border-top: solid blue 2px;
+  pointer-events: none;
+  z-index: 9;
+  transition-duration: 0ms;
+}
+
+.focus {
+  border-top: solid black 2px;
+}
+
+.reference {
+  border-top: dashed #e33060 3px;
+}
+
+.gates {
+  height: 25px;
+  width: 30px;
+  border-top-right-radius: 12.5px;
+  border-bottom-right-radius: 12.5px;
+  background-color: orange; /* fallback color */
+}
+
+.bits, .latches {
+  width: 60px;
+  height: 30px;
+  background-color: orange;
+  image-rendering: pixelated;
+}
+
+.bits {
+  background-image: url("graphics/bit OFF.png");
+}
+
+.bits[data-on="1"] {
+  background-image: url("graphics/bit ON.png");
+}
+
+.latches {
+  background-image: url("graphics/latch OFF.png");
+}
+
+.latches[data-on="1"] {
+  background-image: url("graphics/latch ON.png");
+}
+
+.starts {
+  width: 30px;
+  height: 30px;
+  background-color: orange;
+}
+
+.startButtons {
+  height: 15px;
+  width: 15px;
+  background-color: #44db72;
+  position: absolute;
+  image-rendering: pixelated;
+}
+
+.startButtons[data-pressed] {
+  background-image: url("graphics/start ON.png");
+}
+
+.startButtons:not([data-pressed]) {
+  background-image: url("graphics/start OFF.png");
+}
+
+.startButtons:hover {
+  cursor: pointer;
+}
+
+.buffers {
+  width: 30px;
+  height: 30px;
+}
+
+.triangles {
+  position: absolute;
+  background-color: orange;
+  clip-path: polygon(0% 0%, 100% 50%, 0% 100%);
+  width: 100%;
+  height: 100%;
+}
+
+.lights {
+  width: 8px;
+  height: 8px;
+  position: absolute;
+  z-index: 4;
+
+  transition-property: background, height, width;
+  transition-duration: 100ms;
+  background: #333333;
+}
+
+.lights[data-lighted="1"] {
+  background-image: radial-gradient(#f5f5b596, yellow);
+  width: 30px;
+  height: 30px;
+  border-radius: 100%;
+}
+
+.timers {
+  width: 60px;
+  height: 30px;
+  background-color: orange;
+  background-image: url("graphics/timer.png");
+}
+
+.timerInputs {
+  width: 60px;
+  height: 10px;
+  margin: 0px;
+  position: absolute;
+  display: none;
+}
+
+.timers[data-show] > .timerInputs {
+  display: block;
+}
+
+.timeNumbers {
+  width: 100%;
+  height: 20px;
+  position: absolute;
+  text-align: center;
+}
+
+.timers[data-show] > .timeNumbers {
+  display: none;
+}
+
+.indicatorLEDs {
+  width: 30px;
+  height: 30px;
+  border-radius: 100%;
+  background-color: #6f6f6f;
+  border: solid #333333 2px;
+}
+
+.indicatorLEDs[lighted="1"] {
+  background-color: yellow;
+}
+
+.interactors {
+  width: 60px;
+  height: 25px;
+  z-index: 8;
+  opacity: 1;
+
+  transition-property: transform, opacity;
+  transition-duration: 100ms, 0ms;
+}
+
+.targets {
+  position: absolute;
+  right: 0px;
+  transform: scaleX(-1);
+  background-image: url(graphics/Interactor.png);
+  width: 44px;
+  height: 25px;
+}
+
+.actor_bodies {
+  position: absolute;
+  background-color: orange;
+  width: 16px;
+  height: 100%;
+}
+
+
+.multiBasics { /* don't resize background to show that this is not intended for standard use */
+  width: 30px;
+  height: 30px;
+  background-image: url(graphics/console.png);
+  background-color: black;
+  image-rendering: pixelated;
+}
+
+.digits {
+  width: 100px;
+  height: 120px;
+  background-color: #d78d07;
+}
+
+.digitNumbers {
+  position: absolute;
+  width: 30px;
+  height: 60px;
+  background-color: #767676;
+}
+
+.pluses {
+  transform: rotate(-90deg);
+  position: absolute;
+  font-size: 27px;
+  font-weight: bold;
+  width: 30px;
+  height: 30px;
+  text-align: center;
+}
+
+.pluses:hover {
+  cursor: pointer;
+}
+
+
+.blocks {
+  width: 20px;
+  height: 20px;
+  background-color: #4d361e;
+}
+
+.protodesks {
+  width: 50px;
+  height: 50px;
+  background-color: #9f6b38;
+}
+
+.protodesks[data-curved="1"] {
+  border-radius: 10px;
+}
+
+.chairs {
+  width: 40px;
+  height: 40px;
+  background-color: orange;
+  z-index: 1;
+}
+
+.desks {
+  width: 65px;
+  height: 50px;
+  transform-origin: 25px 25px;
+}
+
+.labels {
+  min-width: 56px;
+  width: 56px;
+  height: 30px;
+  background-color: #e9e9e9a6;
+  z-index: 9;
+  font-size: 24px;
+  border: solid black 1px;
+}
+
+.labelInputs {
+  text-align: center;
+  font-size: inherit;
+  
+  display: block;
+  width: calc(100% - 6px);
+  height: 100%;
+  border: none;
+  padding: 0px;
+  margin: 0px;
+  background: none;
+  padding: 0px 3px 0px 3px;
+  font-family: "Times New Roman", Times, serif;
+}
+
+.labelInputs:focus {
+  border: none;
+  outline: none;
+}
+
+.widthGetters {
+  display: inline-block;
+  font-size: 24px;
+  visibility: hidden;
+  pointer-events: none;
+  user-select: none;
+  white-space: nowrap;
+  font-family: "Times New Roman", Times, serif;
+  
+  position: absolute;
+  top: 0px;
+  left: 0px;
+}
+
+.tables {
+  background-color: #9f6b38;
+}
+
+.tableControls {
+  /* opacity: 0; */
+  display: none;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  z-index: 4;
+  pointer-events: none;
+}
+
+/* .tableControls:hover {
+  opacity: 1;
+} */
+
+.tableControls > div {
+  display: flex;
+  position: absolute;
+  width: 50px;
+  height: 18px;
+  pointer-events: all;
+}
+
+.tableControls > div > button {
+  flex-grow: 1;
+}
+
+.tableControls > div > button:hover {
+  cursor: pointer;
+}
+
+.tableWidths {
+  right: 0px;
+  top: 0px;
+}
+
+.tableHeights {
+  bottom: 0px;
+  left: -50px;
+  transform: rotate(90deg);
+  transform-origin: 100% 100%;
+}
+
+.no-rotations {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  transform-origin: 50% 50%;
+  z-index: 3; 
+}
+
+.boards {
+  width: 150px;
+  height: 5px;
+  background-color: white;
+  border-top: solid #9f6b38 3px;
+  border-right: solid #9f6b38 3px;
+  border-left: solid #9f6b38 3px;
+  border-bottom: solid #9f6b38 3px;
+}
+
+
+.focusesIn:not(.atyp), .focusesOut:not(.atyp), .referencesIn:not(.atyp), .referencesOut:not(.atyp) {
+  position: absolute;
+  border-radius: 100%;
+  z-index: 10;
+}
+
+.focusesIn:not(.atyp), .focusesOut:not(.atyp) {
+  border-style: solid;
+}
+
+.referencesIn:not(.atyp), .referencesOut:not(.atyp) {
+  border-style: dotted;
+}
+
+.focusesIn:not(.atyp), .referencesIn:not(.atyp) {
+  height: 6px;
+  width: 6px;
+  border-width: 2px;
+  border-color: black;
+}
+
+.focusesOut:not(.atyp), .referencesOut:not(.atyp) {
+  height: 10px;
+  width: 10px;
+}
+
+.focusesOut:not(.atyp) {
+  background-color: black;
+  border-width: 0px;
+}
+
+.referencesOut:not(.atyp) {
+  background-color: green;
+  border-width: 0px;
+}
+
+.focusesIn:not([disabled]):not(.atyp):hover, .referencesIn:not(.atyp):not([disabled]):hover {
+  background-color: grey;
+  cursor: pointer;
+}
+
+.focusesOut:not(.atyp):not([disabled]):hover, .referencesOut:not(.atyp):not([disabled]):hover {
+  cursor: pointer;
+  height: 6px;
+  width: 6px;
+  border-width: 2px;
+  border-color: white;
+}
+
+.focusRegions {
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  width: 0px;
+  height: 0px;
+  overflow: visible;
+
+  /* enable to see focus regions jumping around to keep focus points moving smoothly */
+  /* width: 50px; 
+  height: 50px;
+  background-color: orange;
+  outline: black 5px solid; */
+}
+
+.focusRegionPoints {
+  width: 20px;
+  height: 20px;
+  border-radius: 100%;
+  background-image: radial-gradient(transparent, black);
+  z-index: 20;
+  opacity: 1;
+
+  position: absolute;
+  transition-property: left top opacity;
+  transition-duration: 250ms;
+
+  pointer-events: none;
+}
+
+#modalControlsContainer {
+  text-align: center;
+}
+
+#loadValue {
+  resize: none;
+  word-break: break-all;
+}
+
+#preload {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  width: 0px;
+  height: 0px;
+  overflow: hidden;
+}
+
+#gridlines {
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  z-index: -1;
+  pointer-events: none;
+/*   background-color: green; */
+}
+
+
+#keysHolder {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+}
+
+.keys {
+  position: absolute;
+  text-align: center;
+  background-image: url("graphics/key.png");
+  
+  width: 40px;
+  height: 40px;
+  line-height: 40px;
+
+  color: white;
+
+  user-select: none;
+  pointer-events: all;
+}
+
+.keys[data-active="0"] {
+  opacity: 0.3;
+}
+
+.keys:hover {
+  cursor: pointer;
+}
+
+
+.no-transition {
+  transition: none;
+}

@@ -1,0 +1,160 @@
+body {
+  background-color: #b4c3e8 !important;
+}
+
+#title {
+  background-image: linear-gradient(90deg, transparent, #9f6b38, transparent) !important;
+}
+
+.blocks {
+  width: 20px;
+  height: 20px;
+  background-color: #4d361e;
+}
+
+.protodesks {
+  width: 50px;
+  height: 50px;
+  background-color: #9f6b38;
+}
+
+.protodesks[data-curved="1"] {
+  border-radius: 10px;
+}
+
+.chairs {
+  width: 40px;
+  height: 40px;
+  background-color: orange;
+  z-index: 1;
+}
+
+.desks {
+  width: 65px;
+  height: 50px;
+  transform-origin: 25px 25px;
+}
+
+.labels {
+  min-width: 56px;
+  width: 56px;
+  height: 30px;
+  background-color: #e9e9e9a6;
+  z-index: 9;
+  font-size: 24px;
+  border: solid black 1px;
+}
+
+.labelInputs {
+  text-align: center;
+  font-size: inherit;
+  
+  display: block;
+  width: calc(100% - 6px);
+  height: 100%;
+  border: none;
+  padding: 0px;
+  margin: 0px;
+  background: none;
+  padding: 0px 3px 0px 3px;
+  font-family: "Times New Roman", Times, serif;
+}
+
+.labelInputs:focus {
+  border: none;
+  outline: none;
+}
+
+.widthGetters {
+  display: inline-block;
+  font-size: 24px;
+  visibility: hidden;
+  pointer-events: none;
+  user-select: none;
+  white-space: nowrap;
+  font-family: "Times New Roman", Times, serif;
+  
+  position: absolute;
+  top: 0px;
+  left: 0px;
+}
+
+.tables {
+  background-color: #9f6b38;
+}
+
+.tableControls {
+  /* opacity: 0; */
+  display: none;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  z-index: 4;
+  pointer-events: none;
+}
+
+/* .tableControls:hover {
+  opacity: 1;
+} */
+
+.tableControls > div {
+  display: flex;
+  position: absolute;
+  width: 50px;
+  height: 18px;
+  pointer-events: all;
+}
+
+.tableControls > div > button {
+  flex-grow: 1;
+}
+
+.tableControls > div > button:hover {
+  cursor: pointer;
+}
+
+.tableWidths {
+  right: 0px;
+  top: 0px;
+}
+
+.tableHeights {
+  bottom: 0px;
+  left: -50px;
+  transform: rotate(90deg);
+  transform-origin: 100% 100%;
+}
+
+.walls {
+  width: 150px;
+  min-width: 100px;
+  height: 10px;
+  background-color: #b24747;
+}
+
+.lengthButtons {
+  position: absolute;
+  top: 0px;
+  height: 10px;
+  font-size: 9px;
+  padding: 0px 2px 0px 2px;
+  border: solid 1px;
+  width: 25px;
+  display: none;
+}
+
+.walls:hover .lengthButtons {
+  display: inline-block;
+}
+
+.lengthButtons:hover {
+  cursor: pointer;
+}
+
+.longerButtons {
+  right: 0px;
+}
+
+.shorterButtons {
+  right: 25px;
+}

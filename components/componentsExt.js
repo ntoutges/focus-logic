@@ -1,4 +1,4 @@
-import { Component, FocusWire, Gate, Buffer, Bit, Latch, IndicatorLED } from "../components.js";
+import { Component, FocusWire, Gate, Buffer, Bit, Latch, IndicatorLED } from "./components.js";
 
 // these classes will have no logic connections of their own
 export class MultiComponent extends Component {

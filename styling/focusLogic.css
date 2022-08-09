@@ -1,0 +1,255 @@
+body {
+  background-color: #c6e4c9 !important;
+}
+
+#title {
+  background-image: linear-gradient(90deg, transparent, orange, transparent) !important;
+}
+
+#simControls {
+  width: 100px !important;
+  height: 200px !important;
+}
+
+#simSpeed {
+  position: absolute;
+  top: 190px;
+  left: 10px;
+  transform: rotate(-90deg);
+  transform-origin: 0% 0%;
+  width: 180px;
+  height: 30px;
+  margin: 0px;
+}
+
+.gates {
+  height: 25px;
+  width: 30px;
+  border-top-right-radius: 12.5px;
+  border-bottom-right-radius: 12.5px;
+  background-color: orange; /* fallback color */
+}
+
+.bits, .latches {
+  width: 60px;
+  height: 30px;
+  background-color: orange;
+  image-rendering: pixelated;
+}
+
+.bits {
+  background-image: url("../graphics/bit OFF.png");
+}
+
+.bits[data-on="1"] {
+  background-image: url("../graphics/bit ON.png");
+}
+
+.latches {
+  background-image: url("../graphics/latch OFF.png");
+}
+
+.latches[data-on="1"] {
+  background-image: url("../graphics/latch ON.png");
+}
+
+.starts {
+  width: 30px;
+  height: 30px;
+  background-color: orange;
+}
+
+.startButtons {
+  height: 15px;
+  width: 15px;
+  background-color: #44db72;
+  position: absolute;
+  image-rendering: pixelated;
+}
+
+.startButtons[data-pressed] {
+  background-image: url("../graphics/start ON.png");
+}
+
+.startButtons:not([data-pressed]) {
+  background-image: url("../graphics/start OFF.png");
+}
+
+.startButtons:hover {
+  cursor: pointer;
+}
+
+.buffers {
+  width: 30px;
+  height: 30px;
+}
+
+.triangles {
+  position: absolute;
+  background-color: orange;
+  clip-path: polygon(0% 0%, 100% 50%, 0% 100%);
+  width: 100%;
+  height: 100%;
+}
+
+.lights {
+  width: 8px;
+  height: 8px;
+  position: absolute;
+  z-index: 4;
+
+  transition-property: background, height, width;
+  transition-duration: 100ms;
+  background: #333333;
+}
+
+.lights[data-lighted="1"] {
+  background-image: radial-gradient(#f5f5b596, yellow);
+  width: 30px;
+  height: 30px;
+  border-radius: 100%;
+}
+
+.timers {
+  width: 60px;
+  height: 30px;
+  background-color: orange;
+  background-image: url("../graphics/timer.png");
+}
+
+.timerInputs {
+  width: 60px;
+  height: 10px;
+  margin: 0px;
+  position: absolute;
+  display: none;
+}
+
+.timers[data-show] > .timerInputs {
+  display: block;
+}
+
+.timeNumbers {
+  width: 100%;
+  height: 20px;
+  position: absolute;
+  text-align: center;
+}
+
+.timers[data-show] > .timeNumbers {
+  display: none;
+}
+
+.indicatorLEDs {
+  width: 30px;
+  height: 30px;
+  border-radius: 100%;
+  background-color: #6f6f6f;
+  border: solid #333333 2px;
+}
+
+.indicatorLEDs[lighted="1"] {
+  background-color: yellow;
+}
+
+.interactors {
+  width: 60px;
+  height: 25px;
+  z-index: 8;
+  opacity: 1;
+
+  transition-property: transform, opacity;
+  transition-duration: 100ms, 0ms;
+}
+
+.targets {
+  position: absolute;
+  right: 0px;
+  transform: scaleX(-1);
+  background-image: url("../graphics/interactor.png");
+  width: 44px;
+  height: 25px;
+}
+
+.actor_bodies {
+  position: absolute;
+  background-color: orange;
+  width: 16px;
+  height: 100%;
+}
+
+
+.multiBasics { /* don't resize background to show that this is not intended for standard use */
+  width: 30px;
+  height: 30px;
+  background-image: url("../styling/");
+  background-color: black;
+  image-rendering: pixelated;
+}
+
+.digits {
+  width: 100px;
+  height: 120px;
+  background-color: #d78d07;
+}
+
+.digitNumbers {
+  position: absolute;
+  width: 30px;
+  height: 60px;
+  background-color: #767676;
+}
+
+.pluses {
+  transform: rotate(-90deg);
+  position: absolute;
+  font-size: 27px;
+  font-weight: bold;
+  width: 30px;
+  height: 30px;
+  text-align: center;
+}
+
+.pluses:hover {
+  cursor: pointer;
+}
+
+.boards {
+  width: 150px;
+  height: 5px;
+  background-color: white;
+  border-top: solid #9f6b38 3px;
+  border-right: solid #9f6b38 3px;
+  border-left: solid #9f6b38 3px;
+  border-bottom: solid #9f6b38 3px;
+}
+
+.focusRegions {
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  width: 0px;
+  height: 0px;
+  overflow: visible;
+
+  /* enable to see focus regions jumping around to keep focus points moving smoothly */
+  /* width: 50px; 
+  height: 50px;
+  background-color: orange;
+  outline: black 5px solid; */
+}
+
+.focusRegionPoints {
+  width: 20px;
+  height: 20px;
+  border-radius: 100%;
+  background-image: radial-gradient(transparent, black);
+  z-index: 20;
+  opacity: 1;
+
+  position: absolute;
+  transition-property: left top opacity;
+  transition-duration: 250ms;
+
+  pointer-events: none;
+}

@@ -1,16 +1,20 @@
-var $ = window.$;
-import { Key } from "../keys.js";
-import { Wire, FocusWire, ReferenceWire, Gate, Bit, Latch, Start, IndicatorLED, Buffer, Timer, Delay, Interactor } from "../components.js";
-import { MultiComponent, Digit, Counter, ShiftRegister } from "../componentsExt.js";
-import { Block, ProtoDesk, Chair, Label, Desk, Table, Board } from "../classComponents.js";
+import { Key } from "./keys.js";
+import { Wire, FocusWire, ReferenceWire, IndicatorLED } from "../components/components.js";
+import { MultiComponent } from "../components/componentsExt.js";
+
+const $ = window.$;
+const sandbox = $("#sandbox").get(0);
+var conn = {
+  type: null,
+  in: null,
+  out: null
+}
+
 var allComponents = [];
 var allWires = [];
-var allFocusRegions = [];
 
-var editorType = "Logic";
-
-var tools = [];
-var extensions = [];
+extern.tools = [];
+extern.extensions = [];
 
 var keys = {};
 
@@ -20,13 +24,7 @@ const metaGridStep = 5;
 var isSnapping = false;
 var isDrawingGrid = true;
 var isFullScreen = false;
-
-const sandbox = $("#sandbox").get(0);
-var conn = {
-  type: null,
-  in: null,
-  out: null
-}
+var isSelecting = false;
 
 function clearConn() {
   conn.in = null;
@@ -35,14 +33,14 @@ function clearConn() {
 }
 
 function createFocusWire() {
-  let wire = new FocusWire(functions);
+  let wire = new FocusWire(extern.functions);
   wire.connect(conn.out, conn.in);
   wire.manifest(sandbox);
   allWires.push(wire);
 }
 
 function createReferenceWire() {
-  let wire = new ReferenceWire(functions);
+  let wire = new ReferenceWire(extern.functions);
   wire.connect(conn.out, conn.in);
   wire.manifest(sandbox);
   if (conn.in[1] instanceof IndicatorLED) {
@@ -144,12 +142,12 @@ function finishDragging(component) {
 
 function snapToGrid(component, changePos) {
   let pos = { left: component.get().offsetLeft, top: component.get().offsetTop };
-  if (changePos) { component.setPos(pos.left-globalPos.x, pos.top-globalPos.y); }
+  if (changePos) { component.setPos(pos.left-extern.globalPos.x, pos.top-extern.globalPos.y); }
   else {
     let center = component.getCenter();
     let activeGridStep = gridStep/2;
-    let x = Math.round( (pos.left - globalPos.x + activeGridStep) / activeGridStep ) * activeGridStep + globalPos.x - center.x;
-    let y = Math.round( (pos.top - globalPos.y + activeGridStep) / activeGridStep ) * activeGridStep + globalPos.y - center.y;
+    let x = Math.round( (pos.left - extern.globalPos.x + activeGridStep) / activeGridStep ) * activeGridStep + extern.globalPos.x - center.x;
+    let y = Math.round( (pos.top - extern.globalPos.y + activeGridStep) / activeGridStep ) * activeGridStep + extern.globalPos.y - center.y;
     component.get().style.left = x + "px";
     component.get().style.top = y + "px";
   }
@@ -184,172 +182,24 @@ function removeWires(component) { // only meant to remove external wires, going 
 function sleep(ms) {
   return new Promise((resolve) => { setTimeout(() => { resolve() }, ms); })
 }
-
-var simSpeed = 1000;
-var pausedSims = [];
-async function simulate(component, wire=null, focusRegion=null) {
-  if (!focusRegion) {
-    focusRegion = document.createElement("div");
-    let focusRegionPoint = document.createElement("div");
-    allFocusRegions.push(focusRegion);
-
-    focusRegion.setAttribute("class", "focusRegions");
-    focusRegionPoint.setAttribute("class", "focusRegionPoints");
-    focusRegionPoint.style.transitionDuration = (simSpeed / 2) + "ms";
-
-    sandbox.appendChild(focusRegion);
-    focusRegion.appendChild(focusRegionPoint);
-    centerFocusRegion(component.get(), focusRegion);
-  }
-  if (!wire) {
-    wire = null;
-    [wire, component] = await simulateStep(component,wire, focusRegion);
-  }
-  let isPaused = false;
-  while (true) {
-    if (simSpeed < 0) {
-      isPaused = true;
-      break;
-    }
-    await sleep(simSpeed);
-    let result = await simulateStep(component,wire, focusRegion);
-    wire = result[0];    
-    component = result[1];
-    if (!wire) {
-      let delay = 0;
-      if (component instanceof Timer) {
-        delay = component.getDelay(simSpeed);
-        let focusPoint = focusRegion.querySelector(".focusRegionPoints");
-        focusPoint.style.transitionDuration = delay + "ms";
-        focusPoint.style.transitionTimingFunction = "linear";
-      }
-      centerFocusRegion(component.getOutputNode(), focusRegion);
-      if (delay > 0) {
-        await sleep(delay);
-        let focusPoint = focusRegion.querySelector(".focusRegionPoints");
-        focusPoint.style.transitionDuration = (simSpeed / 2) + "ms";
-        focusPoint.style.transitionTimingFunction = "";
-      }
-      setTimeout(() => { finishSimulation(focusRegion); }, simSpeed * 0.8);
-      break;
-    }
-  }
-  if (isPaused) { pausedSims.push([component,wire, focusRegion]); }
-}
-
-function unpauseSim() {
-  for (let simData of pausedSims) { simulate.apply(this, simData); }
-  pausedSims = [];
-}
-
-async function simulateStep(component,wire, focusRegion) {
-  if (!component) { return [null, null] }
-  wire = component.getOutput(wire);
-  if (!wire) { return [null, component]; }
-
-  let isTimer = component instanceof Timer;
-  let delay = 0;
-  let focusPoint = null;
-  
-  if (isTimer) {
-    delay = component.getDelay(simSpeed);
-    focusPoint = focusRegion.querySelector(".focusRegionPoints");
-    focusPoint.offsetHeight; // trigger CSS "reflow"
-    focusPoint.style.transitionDuration = delay + "ms";
-    focusPoint.style.transitionTimingFunction = "linear";
-  }
-
-  let nodes = wire.getNodes();
-  centerFocusRegion(nodes.out, focusRegion);
-   
-  if (isTimer) {
-    await sleep( delay );
-    focusPoint.style.transitionDuration = (simSpeed / 2) + "ms";
-    focusPoint.style.transitionTimingFunction = "";
-  }
-
-  setTimeout(() => {
-    centerFocusRegion(nodes.in, focusRegion);
-  }, simSpeed/2);
-  
-  component = wire.getObjects().in;
-  return [wire, component];
-}
-
-function centerFocusRegion(centerElement, focusRegion) {
-  if (!centerElement) { return; }
-  let bounds = centerElement.getBoundingClientRect();
-  let x =  (bounds.left + bounds.right) / 2;
-  let y = (bounds.top + bounds.bottom) / 2;
-  
-  // may want to transition to the actual offsetLeft and offsetTop commands
-  let offsetX = parseInt( focusRegion.getAttribute("data-left"), 10) || 0;
-  let offsetY = parseInt( focusRegion.getAttribute("data-top"), 10) || 0;
-
-  let focusRegionPoint = focusRegion.querySelector(".focusRegionPoints");
-  let oldX = parseInt( focusRegionPoint.style.left, 10) || 0;
-  let oldY = parseInt( focusRegionPoint.style.top, 10) || 0;
-
-  if (offsetX != 0 || offsetY != 0) {
-    focusRegionPoint.classList.add("no-transition");
-    focusRegionPoint.style.left = `${oldX + offsetX}px`;
-    focusRegionPoint.style.top = `${oldY + offsetY}px`;
-    focusRegion.offsetHeight; // trigger a CSS "reflow"
-    focusRegionPoint.classList.remove("no-transition");
-  }
-  focusRegionPoint.style.left = (x - 10) + "px";
-  focusRegionPoint.style.top = (y - 10) + "px";
-
-  focusRegion.style.left = "0px";
-  focusRegion.style.top = "0px";
-  focusRegion.removeAttribute("data-left");
-  focusRegion.removeAttribute("data-top");
-}
-
-function moveFocusRegions(x,y) {
-  for (let i in allFocusRegions) {
-    let oldX = parseInt( allFocusRegions[i].getAttribute("data-left"), 10) || 0;
-    let oldY = parseInt( allFocusRegions[i].getAttribute("data-top"), 10) || 0;
-    allFocusRegions[i].style.left = `${oldX + x}px`;
-    allFocusRegions[i].style.top = `${oldY + y}px`;
-    allFocusRegions[i].setAttribute("data-left", oldX + x);
-    allFocusRegions[i].setAttribute("data-top", oldY + y);
-  }
-}
-
-function removeFocusRegion(focusRegion) {
-  for (let i in allFocusRegions) {
-    if (allFocusRegions[i] == focusRegion) {
-      allFocusRegions.splice(i,1);
-      break;
-    }
-  }
-  focusRegion.remove();
-}
-
-function finishSimulation(focusRegion) {
-  focusRegion.style.opacity = "0";
-  console.log("Finished!");
-  setTimeout(() => {
-    removeFocusRegion(focusRegion);
-  }, 250);
-}
-
-function setSpeed(newSpeed) {
-  if (newSpeed == simSpeed) { return; }
-  let oldSpeed = simSpeed;
-  simSpeed = newSpeed;
-  if (oldSpeed < 0 && newSpeed >= 0) { unpauseSim(); }
-  let focuses = document.querySelectorAll(".focusRegions");
-  for (let i = 0; i < focuses.length; i++) {
-    focuses[i].style.transitionDuration = (simSpeed / 2) + "ms";
-  }
-}
+extern.sleep = sleep;
 
 document.body.addEventListener("keydown", hotkeyPressed);
 document.body.addEventListener("mousedown", resetFocus);
 
 function hotkeyPressed(e) {
+  if (e.metaKey || e.ctrlKey) {
+    switch(e.keyCode) {
+      case 83: // ctrl-s
+        e.preventDefault();
+        $("#saveButton").click();
+        break;
+      case 79: // ctrl-o
+        e.preventDefault();
+        $("#loadButton").click();
+    }
+    return;
+  }
   switch(e.keyCode) {
     case 82: // r
       keyRotate(e);
@@ -360,9 +210,12 @@ function hotkeyPressed(e) {
     case 71: // g
       toggleGrid();
       break;
+    case 86: // v
+      toggleSelectionMode();
+      break;
     case 70: // f
       toggleFullMode();
-      break;
+      break; 
   }
 }
 
@@ -394,7 +247,7 @@ function toggleSnap() {
   keys["S"].setState(isSnapping);
 }
 
-const functions = {
+extern.functions = {
   FIC: focusInClick,
   FOC: focusOutClick,
   RIC: referenceInClick,
@@ -403,14 +256,14 @@ const functions = {
   FOR: focusOutRelease,
   RIR: referenceInRelease,
   ROR: referenceOutRelease,
-  play: simulate,
+  play: () => { console.log("Function [play] not implemented") },
   PD: performDragging,
   FD: finishDragging,
   focusOn: focusOn,
   addWire: addWire
 }
 
-var globalPos = {
+extern.globalPos = {
   x: 0,
   y: 0,
   iX: -1,
@@ -418,31 +271,35 @@ var globalPos = {
 }
 // global movement stuff
 sandbox.addEventListener("mousedown", (e) => {
-  globalPos.iX = e.pageX;
-  globalPos.iY = e.pageY;
+  if (!isSelecting) {
+    extern.globalPos.iX = e.pageX;
+    extern.globalPos.iY = e.pageY;
+  }
 });
 
 sandbox.addEventListener("mousemove", (e) => {
-  if (globalPos.iX >= 0 && globalPos.iY >= 0) {
-    let newX = globalPos.x - (globalPos.iX - e.pageX);
-    let newY = globalPos.y - (globalPos.iY - e.pageY);
-    globalPos.iX = e.pageX;
-    globalPos.iY = e.pageY;
+  if (!isSelecting && extern.globalPos.iX >= 0 && extern.globalPos.iY >= 0) {
+    let newX = extern.globalPos.x - (extern.globalPos.iX - e.pageX);
+    let newY = extern.globalPos.y - (extern.globalPos.iY - e.pageY);
+    extern.globalPos.iX = e.pageX;
+    extern.globalPos.iY = e.pageY;
     globalSet(newX, newY);
   }
 });
 
 sandbox.addEventListener("mouseup", (e) => {
-  globalPos.iX = -1;
-  globalPos.iY = -1;
+  extern.globalPos.iX = -1;
+  extern.globalPos.iY = -1;
 });
 
 function globalSet(x,y) {
-  moveFocusRegions(x-globalPos.x, y-globalPos.y);
-  globalPos.x = x;
-  globalPos.y = y;
+  if (extern.globalSetOuter) extern.globalSetOuter(x,y);
+  extern.globalPos.x = x;
+  extern.globalPos.y = y;
   for (let component of allComponents) { component.globalSetPos(x,y); }
-  for (let wire of allWires) { wire.globalSetPos(x,y); }
+  for (let wire of allWires) {
+    if (wire.e.parentNode == sandbox) wire.globalSetPos(x,y);
+  }
   drawGridlines();
 }
 
@@ -468,8 +325,8 @@ function drawGridlines() {
     return;
   }
 
-  let xOff = globalPos.x % gridStep;
-  let yOff = globalPos.y % gridStep;
+  let xOff = extern.globalPos.x % gridStep;
+  let yOff = extern.globalPos.y % gridStep;
   for (let i = 0; i < c.width + gridStep; i += gridStep) {
     let x = i + xOff;
     ctx.moveTo(x,0);
@@ -486,8 +343,8 @@ function drawGridlines() {
   // draw meta-grid
   ctx.beginPath();
 
-  let metaXOff = globalPos.x % (gridStep * metaGridStep);
-  let metaYOff = globalPos.y % (gridStep * metaGridStep);
+  let metaXOff = extern.globalPos.x % (gridStep * metaGridStep);
+  let metaYOff = extern.globalPos.y % (gridStep * metaGridStep);
   for (let i = 0; i < c.width + gridStep; i += gridStep * metaGridStep ) {
     let x = i + metaXOff;
     ctx.moveTo(x,0);
@@ -549,40 +406,42 @@ function setFullMode(state) {
   else document.exitFullscreen();
 }
 
+function toggleSelectionMode() {
+  setSelectionMode(!isSelecting)
+  keys["V"].setState(isSelecting);
+}
+
+function setSelectionMode(state) { // to be further implemented later
+  isSelecting = state;
+  if (isSelecting)
+    sandbox.classList.add("no-drag");
+  else 
+    sandbox.classList.remove("no-drag");
+}
+
 const toolbox = $("#toolbox").get(0);
 const extensionBox = $("#extensionBox").get(0);
 function fillComponentSlots() {
-  fillSlotTypes();
+  if (extern.simulate) extern.functions.play = extern.simulate;
   // fill out toolbox
   toolbox.innerHTML = "";
-  for (let i in tools) {
-      createSection(tools[i], toolbox);
+  for (let i in extern.tools) {
+    createSection(extern.tools[i], toolbox);
   }
+  if (extern.tools.length == 0) toolbox.style.display = "none";
 
   // fill out extension box
   extensionBox.innerHTML = "";
-  for (let i in extensions) {
-    createSection(extensions[i], extensionBox);
+  for (let i in extern.extensions) {
+    createSection(extern.extensions[i], extensionBox);
   }
+  if (extern.extensions.length == 0) extensionBox.style.display = "none";
 }
-
-function fillSlotTypes() {
-  let editor = editorType.toUpperCase(); // because it looks cooler
-  switch(editor) {
-    case "LOGIC":
-      tools = [ Start, Buffer, Gate, Bit, Latch, IndicatorLED, Timer, Delay, Interactor ];
-      extensions = [Digit, Counter, ShiftRegister];
-      break;
-    case "CLASS":
-      tools = [Block, ProtoDesk, Chair, Label, Desk, Board];
-      extensions = [Table];
-      break;
-  }
-}
+extern.fillComponentSlots = fillComponentSlots;
 
 function createSection(toolObj, parent) {
   let section = document.createElement("div");
-  let tool = new toolObj(functions);
+  let tool = new toolObj(extern.functions);
   tool.manifest(section, 0,0, false);
   let sectionTitle = document.createElement("h3");
   section.setAttribute("class", "sections");
@@ -611,25 +470,20 @@ function createNewComponent(e,component) {
 
   let bounds = component.get().getBoundingClientRect();
   newComponent.setPos(bounds.left, bounds.top);
-  newComponent.globalSetPos(globalPos.x, globalPos.y);
-  newComponent.move(-globalPos.x, -globalPos.y); // counteract 'globalSetPos'
+  newComponent.globalSetPos(extern.globalPos.x, extern.globalPos.y);
+  newComponent.move(-extern.globalPos.x, -extern.globalPos.y); // counteract 'globalSetPos'
   performDragging(newComponent); // set red box at the top when new component created
 }
 document.body.addEventListener("mousedown", () => { toolbox.setAttribute("data-active", "0"); });
 document.body.addEventListener("mouseup", () => { toolbox.setAttribute("data-active", "1"); });
 
-var speedKey = [-1, 2000,1000,500,100,0];
-document.getElementById("simSpeed").addEventListener("input", function() {
-  if (this.value == 0) { document.getElementById("simSpeedLabel").innerText = "| |"; }
-  else { document.getElementById("simSpeedLabel").innerText = this.value; }
-  setSpeed(speedKey[this.value]);
-});
-
 function fillToggleKeys() {
   const keyTypes = {
+    // {letter}: [ x,y, initialState, triggerFunction ] 
     "G": [20, 70, true, setGridlineDraw], // grid
     "S": [20, 20, false, (state) => { isSnapping = state; }], // snap
-    "F": [70, 20, false, setFullMode] // fullscreen mode
+    "V": [70, 20, false, setSelectionMode],
+    "F": [120, 20, false, setFullMode] // fullscreen mode
   }
 
   const parent = document.getElementById("keysHolder");
@@ -661,17 +515,17 @@ function load(saveString) {
   let localComponents = [];
   for (let str of strings) {
     let name = str.substring(0, str.indexOf("("));
-    let component = null;
-    try { component = eval("new " + name + "(functions)"); }
-    catch(err) {
-      for (let i in tools) { // cover edge cases for scenarios like the IndicatorLED, which is just called "LED"
-        let tempTool = new tools[i](functions);
-        if (tempTool.getName() == name) {
-          component = tempTool;
-          break;
-        }
-      }
-    }
+    let component = extern.make(name);
+    // try { component = eval("new " + name + "(functions)"); }
+    // catch(err) {
+    //   for (let i in extern.tools) { // cover edge cases for scenarios like the IndicatorLED, which is just called "LED"
+    //     let tempTool = new extern.tools[i](extern.functions);
+    //     if (tempTool.getName() == name) {
+    //       component = tempTool;
+    //       break;
+    //     }
+    //   }
+    // }
     component.manifest(sandbox);
     component.e.style.zIndex = 2;
     localComponents.push(component);
@@ -682,13 +536,13 @@ function load(saveString) {
     else { loadComponent(str,i, localComponents, conn,createFocusWire,createReferenceWire); }
   }
   for (let component of localComponents) {
-    component.globalSetPos(globalPos.x, globalPos.y);
+    component.globalSetPos(extern.globalPos.x, extern.globalPos.y);
   }
   allComponents = allComponents.concat(localComponents);
   clearConn();
-
-  
 }
+
+extern.load = load;
 
 function loadComponent(str,i, localComponents, conn,createFocusWire,createReferenceWire) {
   let pos = ( str.split("(")[1].split(")")[0] ).split(";");
@@ -772,10 +626,10 @@ function loadComponentExt(str,i, localComponents, conn,createFocusWire,createRef
     localComponents[i].setData(data);
   }
   if (pos.length > 2)
-    localComponents[i].setRotation( parseInt(pos[2], 10) );
+  localComponents[i].setRotation( parseInt(pos[2], 10) );
   let connListEnd = str.lastIndexOf(">");
-  let connList = str.substring(connListStart, connListEnd).split(";");
-  
+  const re = /(\[(\d*;)*\d*\]-(\d*[rs]*):(\d*[rs]*))/g;
+  let connList = str.substring(connListStart, connListEnd).match(re);
   let subComponents = localComponents[i].getComponents();
   for (let j in connList) {
     let refIds = connList[j].split("[")[1].split("]")[0].split(";");
@@ -868,7 +722,12 @@ const modal = $("#modal").get(0);
 $("#saveButton").click(() => { 
   modal.showModal();
   modal.setAttribute("data-use", "save");
-  $("#loadValue").val( save() );
+  
+  const saveString = save();
+  $("#loadValue").val( saveString );
+  const textArea = $("#loadValue").get(0);
+  textArea.selectionStart = 0;
+  textArea.selectionEnd = saveString.length;
 });
 
 $("#loadButton").click(() => {
@@ -889,7 +748,7 @@ modal.addEventListener("close", (e) => {
         load( $("#loadValue").val() );
       }
       catch(err) {
-        modal.showModal();
+        if (!modal.getAttribute("open")) modal.showModal();
         $("#loadValue").val("An error occurred\n" + err.toString());
         resetPlayarea(); // reset any damage done by loading an invalid value
         return;
@@ -902,6 +761,11 @@ modal.addEventListener("close", (e) => {
     }
   }
   $("#loadValue").val(""); // reset text in textarea
+});
+
+$("#loadValue").keydown((e) => {
+  if (e.keyCode != 13 || e.shiftKey) return;
+  $("#modalConfirm").click();
 });
 
 function getComponentIndex(component, extraComponents=[]) {
@@ -917,11 +781,5 @@ function getComponentIndex(component, extraComponents=[]) {
   return -1;
 }
 
-fillComponentSlots();
+// fillComponentSlots();
 fillToggleKeys();
-
-// use the following string for testing
-load("Bit(222;236)[9;4;12;16+3]-4:,Bit(222;326)[5;6;13;16+2]-6:,Bit(223;420)[7;8;14;16+1]-8:,Bit(225;511)[11;15;16+0]-10:,Gate(213;283)[]-10:5,Gate(262;283)[]-1r:1s,Gate(214;381)[]-10:7,Gate(266;378)[]-2r:2s,Gate(215;474)[]-10:11,Gate(240;190)[]-0r:0s,Buffer(320;300)[]-16+4:,Gate(262;472)[]-3r:3s,LED(287;563)[]-:,LED(249;567)[]-:,LED(212;568)[]-:,LED(174;572)[]-:,Digit(412;399)<[]-:;[]-:;[]-:;[]-:;[]-33:;[]-19+4:>,Start(295;132)[]-23:,Actor(267;118;45)[]-9:,Counter(547;401)<[]-:;[]-:;[]-:;[]-:;[]-33:;[]-:>[[d=1]],Bit(420;210)[23;25]-:,Timer(329;124;270)[]-18:[[d=1000]],Actor(405;193;90)[]-23:,Gate(321;188;180)[]-21:,Start(510;210;180)[]-22:,LED(508;258;270)[]-:,Actor(618;404;180)[]-:,Start(658;465;180)[]-26:")
-
-// seat of shame
-// load("Desk(100;200;450)[[x=269.y=95.t=Seat of shame.e=1]]<[]-:;[]-:;[]-17:[[t=Seat of shame.e=1]]>,Surface(0;200)[]-:,Surface(100;100)[]-:,Surface(25;125;45)[]-:,Surface(175;125;45)[]-:,Surface(200;200;90)[]-:,Surface(25;275;45)[]-:,Surface(100;300)[]-:,Surface(175;275;45)[]-:,Chair(105;330)[]-:,Chair(16;294;45)[]-:,Chair(-20;205)[]-:,Chair(16;116;45)[]-:,Chair(105;80)[]-:,Chair(192;118;45)[]-:,Chair(230;205)[]-:,Chair(194;294;45)[]-:")

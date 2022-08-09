@@ -28,8 +28,12 @@ body {
   width: 100vw;
 }
 
-#sandbox:hover {
+#sandbox:not(.no-drag):hover {
   cursor: grab;
+}
+
+#sandbox.no-drag:hover {
+  cursor: crosshair;
 }
 
 #toolbox, #extensionBox {

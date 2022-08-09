@@ -9,6 +9,7 @@ export class Key {
         if (!this.e) {
             this.e = document.createElement("div");
             this.e.setAttribute("class", "keys");
+            this.e.setAttribute("id", `keys-${this.l}`);
             this.e.innerText = this.l;
             this.e.setAttribute("data-active", this.a ? "1" : "0");
             

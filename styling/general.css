@@ -1,0 +1,361 @@
+body {
+  background-color: cornsilk;
+  margin: 0px;
+  overflow: hidden;
+  
+  width: 100vw;
+  height: 100vh;
+}
+
+#title {
+  text-align: center;
+  position: relative;
+  left: 25vw;
+  width: 50vw;
+  background-image: linear-gradient(90deg, transparent, grey, transparent);
+  margin: 0px;
+  padding: 5px 0px 5px 0px;
+  z-index: 100;
+  user-select: none;
+  pointer-events: none;
+}
+
+#sandbox {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  height: 100vh;
+  width: 100vw;
+}
+
+#sandbox:not(.no-drag):hover {
+  cursor: grab;
+}
+
+#sandbox.no-drag:hover {
+  cursor: crosshair;
+}
+
+#toolbox, #extensionBox {
+  position: absolute;
+  top: 0px;
+  width: 25vw;
+  height: 30px;
+  background-color: lightgreen;
+  z-index: 10;
+  
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: space-evenly;
+
+  transition-property: height, opacity;
+  transition-duration: 250ms, 100ms;
+}
+
+#title, #simControls {
+  opacity: 1;
+  transition-property: opacity;
+  transition-duration: 100ms;
+}
+
+#simControls {
+  position: absolute;
+  right: 0px;
+  bottom: 0px;
+  width: 64px;
+  height: 100px;
+
+  padding: 0px 20px 20px 10px;
+  background-color: rgb(160, 160, 160);
+  z-index: 100;
+
+  transition-property: opacity;
+  transition-duration: 100ms;
+}
+
+#simSpeedLabel {
+  position: absolute;
+  top: 192px;
+  left: 10px;
+  width: 30px;
+  display: inline-block;
+  text-align: center;
+}
+
+#toolbox[data-hidden="0"], #extensionBox[data-hidden="0"], #title[data-hidden="0"], #simControls[data-hidden="0"] {
+  opacity: 1;
+}
+
+#toolbox[data-hidden="1"], #extensionBox[data-hidden="1"], #title[data-hidden="1"], #simControls[data-hidden="1"] {
+  opacity: 0;
+  user-select: none;
+}
+
+#keysHolder[data-hidden="1"]:hover {
+  opacity: 1;
+}
+
+#keysHolder[data-hidden="1"] {
+  opacity: 0;
+}
+
+#toolbox {
+  left: 0px;
+}
+
+#extensionBox {
+  right: 0px;
+}
+
+#toolbox[data-active="0"] {
+  pointer-events: none;
+}
+
+#toolbox:hover {
+  height: 80px;
+}
+
+#extensionBox:hover {
+  height: 120px;
+}
+  
+.sections {
+  flex: 1 0 0;
+  /* height: 80px; */
+  background-color: #9aa0e4;
+  display: inline-block;
+  border-right: solid black 2px;
+  position: relative;
+  overflow: hidden;
+
+  transition-property: flex;
+  transition-duration: 250ms;
+  /* transition-timing-function: linear; */
+}
+
+#toolbox > .sections:hover {
+  flex: 0 0 80px;
+}
+
+#extensionBox > .sections:hover {
+  flex: 0 0 120px;
+}
+
+.sections:last-child {
+  border-right: none;
+}
+
+.sectionTitles {
+  position: absolute;
+  bottom: 5px;
+  width: 100%;
+  text-align: center;
+  margin: 0px;
+  background-image: linear-gradient(to top, #9aa0e4aa 30%, #9aa0e4aa, transparent);
+  pointer-events: none;
+  user-select: none;
+  z-index: 100;
+}
+
+.sections > .components {
+  z-index: 0;
+}
+
+#deletionOverlay {
+  width: 100vw;
+  height: 50px;
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  background-image: linear-gradient(red, transparent);
+  z-index: 1000;
+  pointer-events: none;
+  
+  opacity: 0;
+  transition-property: opacity;
+  transition-duration: 200ms;
+}
+
+#saveButton, #loadButton, #clearButton {
+  position: absolute;
+  right: 10px;
+  padding: 5px 20px 5px 20px;
+}
+
+#saveButton {
+  bottom: 10px;
+}
+
+#loadButton {
+  bottom: 45px;
+}
+
+#clearButton {
+  bottom: 80px;
+}
+
+.components {
+  position: absolute;
+  user-select: none;
+  z-index: 2;
+
+  transition-property: transform;
+  transition-duration: 100ms;
+}
+
+.components:hover {
+  cursor: move;
+}
+
+.components[data-focus] {
+  outline: #0ea94f 4px solid;
+}
+
+.basics {
+  height: 20px;
+  width: 20px;
+  background-color: rgb(255, 31, 255);
+}
+
+.wires {
+  transform-origin: 0% 50%;
+  border-top: solid blue 2px;
+  pointer-events: none;
+  z-index: 9;
+  transition-duration: 0ms;
+}
+
+.focus {
+  border-top: solid black 2px;
+}
+
+.reference {
+  border-top: dashed #e33060 3px;
+}
+
+.no-rotations {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  transform-origin: 50% 50%;
+  z-index: 3; 
+}
+
+
+
+.focusesIn:not(.atyp), .focusesOut:not(.atyp), .referencesIn:not(.atyp), .referencesOut:not(.atyp) {
+  position: absolute;
+  border-radius: 100%;
+  z-index: 10;
+}
+
+.focusesIn:not(.atyp), .focusesOut:not(.atyp) {
+  border-style: solid;
+}
+
+.referencesIn:not(.atyp), .referencesOut:not(.atyp) {
+  border-style: dotted;
+}
+
+.focusesIn:not(.atyp), .referencesIn:not(.atyp) {
+  height: 6px;
+  width: 6px;
+  border-width: 2px;
+  border-color: black;
+}
+
+.focusesOut:not(.atyp), .referencesOut:not(.atyp) {
+  height: 10px;
+  width: 10px;
+}
+
+.focusesOut:not(.atyp) {
+  background-color: black;
+  border-width: 0px;
+}
+
+.referencesOut:not(.atyp) {
+  background-color: green;
+  border-width: 0px;
+}
+
+.focusesIn:not([disabled]):not(.atyp):hover, .referencesIn:not(.atyp):not([disabled]):hover {
+  background-color: grey;
+  cursor: pointer;
+}
+
+.focusesOut:not(.atyp):not([disabled]):hover, .referencesOut:not(.atyp):not([disabled]):hover {
+  cursor: pointer;
+  height: 6px;
+  width: 6px;
+  border-width: 2px;
+  border-color: white;
+}
+
+
+
+#modalControlsContainer {
+  text-align: center;
+}
+
+#loadValue {
+  resize: none;
+  word-break: break-all;
+}
+
+#preload {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  width: 0px;
+  height: 0px;
+  overflow: hidden;
+}
+
+#gridlines {
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  z-index: -1;
+  pointer-events: none;
+/*   background-color: green; */
+}
+
+
+
+#keysHolder {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+}
+
+.keys {
+  position: absolute;
+  text-align: center;
+  background-image: url("../graphics/key.png");
+  
+  width: 40px;
+  height: 40px;
+  line-height: 40px;
+
+  color: white;
+
+  user-select: none;
+  pointer-events: all;
+}
+
+.keys[data-active="0"] {
+  opacity: 0.3;
+}
+
+.keys:hover {
+  cursor: pointer;
+}
+
+
+.no-transition {
+  transition: none;
+}

@@ -1,5 +1,5 @@
-import { Component, FocusWire, Gate, Buffer, Bit, Latch, IndicatorLED } from "../components.js";
-import { MultiComponent } from "../componentsExt.js";
+import { Component, FocusWire, Gate, Buffer, Bit, Latch, IndicatorLED } from "./components.js";
+import { MultiComponent } from "./componentsExt.js";
 
 export class Block extends Component {
   constructor(functions) {
@@ -19,20 +19,57 @@ export class Block extends Component {
   clone() { return new Block(this.f); }
 }
 
-export class Board extends Block {
+export class Wall extends Block {
   constructor(functions) {
     super(functions);
-    this.n = "Board";
+    this.n = "Wall";
+    this.resizeOb = null;
+    this.width = 1;
   }
   manifest(parent, x,y, active=true) {
     if (!this.e) {
       this.e = document.createElement("div");
-      this.e.setAttribute("class", "components boards focusesIn atyp");
+      let longerButton = document.createElement("button");
+      let shorterButton = document.createElement("button");
+
+      this.e.setAttribute("class", "components walls focusesIn atyp");
+      longerButton.setAttribute("class", "lengthButtons longerButtons");
+      shorterButton.setAttribute("class", "lengthButtons shorterButtons");
+      
+      longerButton.innerText = ">";
+      shorterButton.innerText = "<";
+
+      longerButton.addEventListener("click", this.incWidth.bind(this, 1));
+      shorterButton.addEventListener("click", this.incWidth.bind(this, -1));
+      longerButton.addEventListener("mousedown", (e) => { e.stopPropagation(); });
+      shorterButton.addEventListener("mousedown", (e) => { e.stopPropagation(); });
+
       parent.appendChild(this.e);
+      this.e.appendChild(shorterButton);
+      this.e.appendChild(longerButton);
     }
     super.manifest(parent, x,y, active);
   }
-  clone() { return new Board(this.f); }
+  incWidth(dir) {
+    this.width += 1 * dir;
+    if (this.width < 0) this.width = 0;
+    const width = (this.width * 50) + 100;
+    this.e.style.width = `${width}px`;
+  }
+  getWidth() { return this.width; }
+  toSaveString(getComponentId) {
+    let str = super.toSaveString(getComponentId);
+    return `${str}${this.getDataString()}`;
+  }
+  getDataString() {
+    let width = this.getWidth();
+    return (width == 1) ? "" : `[[w=${width}]]`;
+  }
+  setData(data) {
+    if ("w" in data) this.width = parseInt(data.w,10);
+    this.incWidth(0); // update HTML width
+  }
+  clone() { return new Wall(this.f); }
 }
 
 export class ProtoDesk extends Block {
@@ -48,7 +85,7 @@ export class ProtoDesk extends Block {
       this.e.setAttribute("data-curved", "1");
       parent.appendChild(this.e);
     }
-    this.e.addEventListener("dbldclick", this.toggleDeskRadius.bind(this));
+    this.e.addEventListener("dblclick", this.toggleDeskRadius.bind(this));
     super.manifest(parent, x,y, active, eventParent);
   }
   toggleDeskRadius() {
@@ -496,7 +533,7 @@ export class Table extends MultiComponent { // note to future self - fix the wie
       setTimeout((desk) => {
         if (desk.e.parentNode) // ensure that desk still actually exists
           desk.move(0,0); // update wire positions
-      }, 100, desk)
+      }, 100, desk);
     }
     const absPos = this.e.querySelector(".no-rotations");
     if (absPos)

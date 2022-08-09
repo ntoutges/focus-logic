@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <link href="styling/focusLogic.css" rel="stylesheet">
+    <link href="styling/general.css" rel="stylesheet">
+    <script src="jquery-3.6.0.js"></script>
+    <script> var extern = {}; </script>
+    <script src="scripts/general.js" type="module"></script>
+    <script src="scripts/focusLogic.js" type="module" defer></script>
+    <link type="image/x-icon" rel="icon" href="graphics/start OFF.png">
+  </head>
+  <body>
+    <h1 id="title">
+      Focus Logic
+    </h1>
+    <div id="sandbox"></div>
+    <div id="toolbox"></div>
+    <div id="extensionBox"></div>
+    <div id="deletionOverlay"></div>
+    <div id="keysHolder"></div>
+    <canvas id="gridlines" width="0" height="0"></canvas>
+    <div id="simControls">
+      <input id="simSpeed" type="range" step="1" min="0" max="5" value="2">
+      <label id="simSpeedLabel" for="simSpeed">2</label>
+      <button id="clearButton">Clear</button>
+      <button id="loadButton">Load</button>
+      <button id="saveButton">Save</button>
+    </div>
+    <dialog id="modal">
+      <form method="dialog">
+        <textarea id="loadValue" placeholder="Save String" cols="50" rows="10"></textarea>
+        <div id="modalControlsContainer">
+          <button value="cancel" id="modalExit">Cancel</button>
+          <button value="default" id="modalConfirm">Confirm</button>
+        </div>
+      </form>
+    </dialog>
+    <div id="preload">
+      <img src="./graphics/latch OFF.png">
+      <img src="./graphics/latch ON.png">
+      <img src="./graphics/start OFF.png">
+      <img src="./graphics/start ON.png">
+      <img src="./graphics/bit OFF.png">
+      <img src="./graphics/bit ON.png">
+      <img src="./graphics/key.png">
+      <img src="./graphics/Interactor.png">
+      <img src="./graphics/Digits/digit-0.png">
+      <img src="./graphics/Digits/digit-1.png">
+      <img src="./graphics/Digits/digit-2.png">
+      <img src="./graphics/Digits/digit-3.png">
+      <img src="./graphics/Digits/digit-4.png">
+      <img src="./graphics/Digits/digit-5.png">
+      <img src="./graphics/Digits/digit-6.png">
+      <img src="./graphics/Digits/digit-7.png">
+      <img src="./graphics/Digits/digit-8.png">
+      <img src="./graphics/Digits/digit-9.png">
+      <img src="./graphics/Digits/digit-10.png">
+      <img src="./graphics/Digits/digit-11.png">
+      <img src="./graphics/Digits/digit-12.png">
+      <img src="./graphics/Digits/digit-13.png">
+      <img src="./graphics/Digits/digit-14.png">
+      <img src="./graphics/Digits/digit-15.png">
+    </div>
+  </body>
+</html>

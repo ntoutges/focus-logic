@@ -1,6 +1,6 @@
 import { Key } from "./keys.js";
-import { Wire, FocusWire, ReferenceWire, IndicatorLED } from "/components/components.js";
-import { MultiComponent } from "/components/componentsExt.js";
+import { Wire, FocusWire, ReferenceWire, IndicatorLED } from "../components/components.js";
+import { MultiComponent } from "../components/componentsExt.js";
 
 const $ = window.$;
 const sandbox = $("#sandbox").get(0);

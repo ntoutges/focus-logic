@@ -1,4 +1,4 @@
-import { Block, ProtoDesk, Chair, Label, Desk, Table, Wall } from "/components/classComponents.js";
+import { Block, ProtoDesk, Chair, Label, Desk, Table, Wall } from "../components/classComponents.js";
 
 extern.tools = [Block, ProtoDesk, Chair, Label, Desk, Wall];
 // extern.extensions = [Table]; // the table is (for some unknown reason) broken

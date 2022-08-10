@@ -1,5 +1,5 @@
-import { Wire, FocusWire, ReferenceWire, Gate, Bit, Latch, Start, IndicatorLED, Buffer, Timer, Delay, Interactor } from "/components/components.js";
-import { MultiComponent, Digit, Counter, ShiftRegister } from "/components/componentsExt.js";
+import { Wire, FocusWire, ReferenceWire, Gate, Bit, Latch, Start, IndicatorLED, Buffer, Timer, Delay, Interactor } from "../components/components.js";
+import { MultiComponent, Digit, Counter, ShiftRegister } from "../components/componentsExt.js";
 
 var allFocusRegions = [];
 

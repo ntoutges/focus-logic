@@ -73,5 +73,5 @@ for (let id in backgroundKey) {
   const button = $(`#${id}`);
   button.mousedown(function() { $(this).css("opacity", "0.9"); });
   button.mouseleave(function() { $(this).css("opacity", ""); })
-  button.click(() => { window.location.href = `/${backgroundKey[id]}.html`; });
+  button.click(() => { window.location.href = `${backgroundKey[id]}.html`; });
 }
